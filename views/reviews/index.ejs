@@ -1,0 +1,85 @@
+<% include ../partials/header %>
+
+<main role="main" class="show container py-4">
+
+<!-- Park reviews -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between pb-2">
+            <h4 class="d-inline-block m-0">Reviews:</h4>
+            <a class="btn btn-secondary btn-sm" href="/parks/<%= park._id %>">
+                <i class="fas fa-chevron-circle-left"></i> Go Back
+            </a>
+        </div>
+        <h4 class=""><%= park.name %></h4>
+        <div>
+            <p>
+                <span class="fa fa-star <% if (park.rating >= 1) { %> checked <% } %>"></span>
+                <span class="fa fa-star <% if (park.rating > 1.5) { %> checked <% } %>"></span>
+                <span class="fa fa-star <% if (park.rating > 2.5) { %> checked <% } %>"></span>
+                <span class="fa fa-star <% if (park.rating > 3.5) { %> checked <% } %>"></span>
+                <span class="fa fa-star <% if (park.rating > 4.5) { %> checked <% } %>"></span>
+                <span class="font-italic">(Total reviews: <%= park.reviews.length %>)</span>
+            </p>
+            <p>Current park rating: <span class="font-weight-bold"><%= park.rating.toFixed(2) %></span></p>
+        </div>
+        <hr class="hr-faded-end mb-4">
+        <% if (park.reviews.length !== 0) { %>
+            <% park.reviews.forEach( review => { %>
+                <div>
+                    <div class="d-flex justify-content-between">
+                        <span class="font-weight-bold"><%= review.author.username %></span>
+                        <span class="small text-muted"><%= getDisplayDate(review.updatedAt) %></span>
+                    </div>
+                    <div>
+                        <%- '<span class="fa fa-star checked"></span>'.repeat(review.rating) %>
+                        <%- '<span class="fa fa-star"></span>'.repeat(5 - review.rating) %>
+                    </div>
+                    <div class="pl-4">
+                        <p class="text-justify"><%= review.text %></p>
+                        <% if (user && user._id.equals(review.author.userId)) { %>
+                            <div class="mt-2 mb-3">
+                                <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/reviews/<%= review._id %>/edit">
+                                    <i class="fas fa-edit"></i> Edit Review
+                                </a>
+                                <button class="btn btn-success btn-sm ml-2" data-toggle="modal" data-target="#reviewDeleteConfirmation<%= review._id %>">
+                                    <i class="fas fa-trash-alt"></i> Delete Review
+                                </button>
+
+                                <!-- Modal dialog for review delete confirmationn -->
+                                <div class="modal fade" id="reviewDeleteConfirmation<%= review._id %>" tabindex="-1" role="dialog" aria-labelledby="reviewDeleteConfirmationTitle<%= review._id %>" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="reviewDeleteConfirmationTitle<%= review._id %>">Delete confirmation</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete the review?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <form class="d-inline-block ml-2" action="/parks/<%= park._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                                                    <button type="submit" class="btn btn-success">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p class="text-muted">There are no reviews yet on this park.</p>
+        <% } %>
+    </div>
+</div>
+
+</main>
+
+<% include ../partials/footer %>

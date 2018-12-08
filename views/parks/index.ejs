@@ -1,0 +1,62 @@
+<% include ../partials/header %>
+<link rel="stylesheet" href="/css/parks/index.css">
+
+<main role="main" class="container pt-4">
+    
+    <% include ../partials/flash %>
+
+    <!-- Jumbotron -->
+    <div class="jumbotron shadow m-0 text-center py-4">
+        <h1><i class="fab fa-pagelines text-success"></i> Welcome to Park Discovery!</h1>
+        <p class="lead">View and share your wonderful experiences from one or more of the lovely parks all over the world.</p>
+        <hr class="hr-faded-end my-4">
+        <a class="btn btn-success" href="/parks/new">
+            <i class="fas fa-file-alt"></i> Add New Park
+        </a>
+        <div class="d-inline-block mt-3 mt-sm-0 ml-sm-2 ml-md-4">
+            <form action="/parks" method="GET" class="form-inline">
+                <div class="form-group btn-group">
+                    <input class="form-control" type="text" name="search" placeholder="Search keyword(s)...">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-search"></i></button>
+                </div>
+            </form>  
+        </div>
+    </div>
+
+    <!-- Grid of cards -->
+    <div class="row text-center py-3">
+        <% if (parks) { %>
+            <% parks.forEach(park => { %>
+                <div class="col-md-6 col-lg-4 py-4">
+                    <div class="gallery card border-success shadow">
+                        <!-- <img class="card-img-top" src="<%= park.image %>" alt="Park Image">
+                        Due to limation of object-fit for IE, a workaround is then used. -->
+                        <div class="card-img-top" style="background-image: url(<%= park.image %>)"></div>
+                        <div class="card-body">
+                            <h5 class="card-title mb-0"><%= park.name %></h5>
+                            <div class="mt-2 mb-3">
+                                <% if (park.rating === 0) { %>
+                                    <span class="font-italic text-muted">No reviews yet.</span>
+                                <% } else { %>
+                                    <span class="fa fa-star checked"></span>
+                                    <span class="fa fa-star <% if (park.rating > 1.5) { %> checked <% } %>"></span>
+                                    <span class="fa fa-star <% if (park.rating > 2.5) { %> checked <% } %>"></span>
+                                    <span class="fa fa-star <% if (park.rating > 3.5) { %> checked <% } %>"></span>
+                                    <span class="fa fa-star <% if (park.rating > 4.5) { %> checked <% } %>"></span>
+                                <% } %>
+                            </div>
+                            <div>
+                                <a class="btn btn-success" href="/parks/<%= park._id %>">
+                                    <i class="fas fa-info-circle"></i> More info
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } %>
+    </div>
+
+</main>
+
+<% include ../partials/footer %>

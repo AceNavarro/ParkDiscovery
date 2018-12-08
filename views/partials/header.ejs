@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Park Discovery</title>
+        <meta name="author" content="Ace Navarro">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+        <!-- Font Awesome (Icons) -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+        <!-- Animate CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+        <!-- Main CSS -->
+        <link rel="stylesheet" type="text/css" href="/css/main.css">
+    </head>
+    <body>
+        <header class="">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                <div class="container">
+                    <a class="navbar-brand font-weight-bold" href="/">
+                        <i class="fab fa-pagelines"></i>
+                        Park Discovery
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarParkAdvisor"
+                        aria-controls="navbarParkAdvisor" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-between" id="navbarParkAdvisor">
+                        <div class="navbar-nav">
+                            <a class="nav-item nav-link" href="/parks">Explore</a>
+                            <!-- <div class="nav-item nav-link disabled ml-md-2">
+                                    <form action="/parks" method="GET" class="form-inline">
+                                        <div class="form-group btn-group">
+                                            <input class="form-control-sm" type="text" name="search" placeholder="Search keyword(s)...">
+                                            <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-search"></i></button>
+                                        </div>
+                                    </form>  
+                            </div> -->
+                        </div>
+                        <div class="navbar-nav">
+                            <% if (user) { %>
+                                <span class="nav-item nav-link disabled">Hi <%= user.username %>!</span>
+                                <a class="nav-item nav-link" href="/user/logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </a>
+                            <% } else { %>
+                                <a class="nav-item nav-link" href="/user/login">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Login
+                                </a>
+                                <a class="nav-item nav-link" href="/user/signup">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>

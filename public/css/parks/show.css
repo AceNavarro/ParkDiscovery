@@ -1,0 +1,10 @@
+/* NEW - container styles
+-------------------------------------------------- */
+.show.container {
+    max-width: 800px;
+}
+
+#map {
+    width: 100%;
+    height: 500px;
+}

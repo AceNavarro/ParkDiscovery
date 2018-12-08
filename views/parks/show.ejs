@@ -1,0 +1,242 @@
+<% include ../partials/header %>
+<link rel="stylesheet" href="/css/parks/show.css">
+
+<main role="main" class="show container py-4">
+
+    <% include ../partials/flash %>
+
+    <h2><%= park.name %></h2>
+
+    <!-- Park image and description -->
+    <div class="card shadow mb-4">
+        <img class="card-img-top" src="<%= park.image %>" alt="Park image">
+        <div class="card-body">
+            <p class="card-text lead text-justify"><%= park.description %></p>
+            <p class="card-text text-muted font-italic">Submitted by <%= park.author.username %></p>
+
+            <% if (user && user._id.equals(park.author.userId)) { %>
+                <div class="my-2">
+                    <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/edit">
+                        <i class="fas fa-edit"></i> Edit Park
+                    </a>
+                    <button class="btn btn-success btn-sm ml-2" data-toggle="modal" data-target="#parkDeleteConfirmation">
+                        <i class="fas fa-trash-alt"></i> Delete Park
+                    </button>
+                </div>
+            <% } %>
+
+            <!-- Modal dialog for park delete confirmationn -->
+            <div class="modal fade" id="parkDeleteConfirmation" tabindex="-1" role="dialog" aria-labelledby="parkDeleteConfirmationTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="parkDeleteConfirmationTitle">Delete confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete the park?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <form class="d-inline-block ml-2" action="/parks/<%= park._id %>?_method=DELETE" method="POST">
+                                <button type="submit" class="btn btn-success">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (park.location) { %>
+        <div id="map" class="card shadow mb-4"></div>
+    <% } %>
+
+    <!-- Park reviews -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between pb-2">
+                <h4 class="d-inline-block m-0">Reviews:</h4>
+                <a class="btn btn-success btn-sm 
+                        <% if (user && park.reviews.some(review => { %>
+                            <% return review.author.userId.equals(user._id) })) { %> 
+                                disabled 
+                        <% } %>" 
+                        href="/parks/<%= park._id %>/reviews/new">
+                    <i class="fas fa-star"></i> Add Review
+                </a>
+            </div>
+            <div>
+                <p>
+                    <span class="fa fa-star <% if (park.rating >= 1) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (park.rating > 1.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (park.rating > 2.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (park.rating > 3.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (park.rating > 4.5) { %> checked <% } %>"></span>
+                    <span class="font-italic">(Total reviews: <%= park.reviews.length %>)</span>
+                </p>
+                <p>Current park rating: <span class="font-weight-bold"><%= park.rating.toFixed(2) %></span></p>
+            </div>
+            <div>
+                <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/reviews">
+                    <i class="fas fa-chevron-circle-right"></i> See All Reviews
+                </a>
+            </div>
+            <hr class="hr-faded-end mb-4">
+            <% if (park.reviews.length !== 0) { %>
+                <% park.reviews.slice(0, 5).forEach( review => { %>
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <span class="font-weight-bold"><%= review.author.username %></span>
+                            <span class="small text-muted"><%= getDisplayDate(review.updatedAt) %></span>
+                        </div>
+                        <div>
+                            <%- '<span class="fa fa-star checked"></span>'.repeat(review.rating) %>
+                            <%- '<span class="fa fa-star"></span>'.repeat(5 - review.rating) %>
+                        </div>
+                        <div class="pl-4">
+                            <p class="text-justify"><%= review.text %></p>
+                            <% if (user && user._id.equals(review.author.userId)) { %>
+                                <div class="mt-2 mb-3">
+                                    <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/reviews/<%= review._id %>/edit">
+                                        <i class="fas fa-edit"></i> Edit Review
+                                    </a>
+                                    <button class="btn btn-success btn-sm ml-2" data-toggle="modal" data-target="#reviewDeleteConfirmation<%= review._id %>">
+                                        <i class="fas fa-trash-alt"></i> Delete Review
+                                    </button>
+    
+                                    <!-- Modal dialog for review delete confirmationn -->
+                                    <div class="modal fade" id="reviewDeleteConfirmation<%= review._id %>" tabindex="-1" role="dialog" aria-labelledby="reviewDeleteConfirmationTitle<%= review._id %>" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="reviewDeleteConfirmationTitle<%= review._id %>">Delete confirmation</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete the review?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <form class="d-inline-block ml-2" action="/parks/<%= park._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                                                        <button type="submit" class="btn btn-success">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+    
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted">There are no reviews yet on this park.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Park comments -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between pb-2">
+                <h4 class="d-inline-block m-0">Comments:</h4>
+                <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/comments/new">
+                    <i class="fas fa-file-alt"></i> Add Comment
+                </a>
+            </div>
+            <div>
+                <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/comments">
+                    <i class="fas fa-chevron-circle-right"></i> See All Comments
+                </a>
+            </div>
+            <hr class="hr-faded-end mb-4">
+            <% if (park.comments.length !== 0) { %>
+                <% park.comments.slice(0, 5).forEach( comment => { %>
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <span class="font-weight-bold"><%= comment.author.username %></span>
+                            <span class="small text-muted"><%= getDisplayDate(comment.updatedAt) %></span>
+                        </div>
+                        <div class="pl-4">
+                            <p class="text-justify"><%= comment.text %></p>
+                            <% if (user && user._id.equals(comment.author.userId)) { %>
+                                <div class="mt-2 mb-3">
+                                    <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/comments/<%= comment._id %>/edit">
+                                        <i class="fas fa-edit"></i> Edit Comment
+                                    </a>
+                                    <button class="btn btn-success btn-sm ml-2" data-toggle="modal" data-target="#commentDeleteConfirmation<%= comment._id %>">
+                                        <i class="fas fa-trash-alt"></i> Delete Comment
+                                    </button>
+
+                                    <!-- Modal dialog for comment delete confirmationn -->
+                                    <div class="modal fade" id="commentDeleteConfirmation<%= comment._id %>" tabindex="-1" role="dialog" aria-labelledby="commentDeleteConfirmationTitle<%= comment._id %>" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="commentDeleteConfirmationTitle<%= comment._id %>">Delete confirmation</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete the comment?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <form class="d-inline-block ml-2" action="/parks/<%= park._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                                                        <button type="submit" class="btn btn-success">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted">There are no comments yet on this park.</p>
+            <% } %>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    function initMap() {
+        var lat = <%= park.lat %>;
+        var lng = <%= park.lng %>;
+        var center = {lat: lat, lng: lng };
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 14,
+            center: center,
+            scrollwheel: false
+        });
+        var contentString = `
+        <strong><%= park.name %><br />
+        <%= park.location %></strong>
+        <p><%= park.description %></p>
+        `
+        var infowindow = new google.maps.InfoWindow({
+        content: contentString
+        });
+        var marker = new google.maps.Marker({
+            position: center,
+            map: map
+        });
+        marker.addListener('click', function() {
+        infowindow.open(map, marker);
+        });
+    }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjIuVHReXqGFEbwLnLUOpVawGbugHt37Y&callback=initMap"></script>
+
+<% include ../partials/footer %>

@@ -1,0 +1,24 @@
+<% include ../partials/header %>
+
+<main role="main" class="new container pt-4">
+    <div class="pb-2">
+        <h3 class="text-center">Add a New Comment</h3>
+        <div class="jumbotron shadow py-3">
+            <p>Share to us what you think of this park: 
+                <span class="font-weight-bold text-success"><%= park.name %></span>
+            </p>
+            
+            <form action="/parks/<%= park._id %>/comments" method="POST">
+                <div class="form-group">
+                        <textarea class="form-control" name="comment" rows="5" placeholder="Enter your comment" required autofocus></textarea>
+                    </div>
+                <div class="form-group pt-2">
+                    <button type="submit" class="btn btn-success btn-lg btn-block">Submit</button>
+                    <a href="/parks/<%= park._id %>" class="btn btn-secondary btn-lg btn-block">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<% include ../partials/footer %>

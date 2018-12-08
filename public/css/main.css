@@ -1,0 +1,66 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+margin-bottom: 50px; /* Margin bottom by footer height */
+background-color: #F5F5F5;
+}
+
+.footer {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 50px; /* Set the fixed height of the footer here */
+line-height: 50px; /* Vertically center the text there */
+font-size: 0.8rem;
+}
+
+
+/* Navbar styles
+-------------------------------------------------- */
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+    /* Bootstrap v4 color: success */
+    color: white;
+    /* Bootstrap v4 color: dark */
+    border-bottom: 4px solid #343a40;
+}
+
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .navbar-nav .nav-link:hover {
+    /* Bootstrap v4 color: success */
+    color: #28A745;
+    border-bottom: 4px solid #28A745;
+}
+
+.navbar-dark .navbar-nav .nav-link.disabled,
+.navbar-dark .navbar-nav .nav-link.disabled:hover {
+    color: white;
+    /* Bootstrap v4 color: dark */
+    border-bottom: 4px solid #343a40;
+}
+
+
+/* NEW - container styles
+-------------------------------------------------- */
+.new.container {
+    max-width: 600px;
+}
+
+/* hr end-faded style
+-------------------------------------------------- */
+.hr-faded-end {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+/* Rating style
+-------------------------------------------------- */
+.checked {
+    color: orange;
+}

@@ -1,0 +1,37 @@
+<% include ../partials/header %>
+
+<main role="main" class="new container pt-4">
+
+    <% include ../partials/flash %>
+
+    <div>
+        <h3>Returning user? </h3> 
+        <div class="jumbotron shadow py-3">
+            <div class="mb-4">Please log in to your account:</div>
+            <form action="/user/login" method="POST">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button class="btn btn-lg btn-success btn-block" type="submit">Log in</button>
+              </form>
+        </div>
+    </div>
+
+    <div class="pb-4">
+        <h3>Don't have an account? </h3>
+        <div class="jumbotron shadow py-4 mb-0">
+            <p>Having an account enables you to do a number of things, including:</p>
+            <li>Add new park</li>
+            <li>Modify and delete your own parks</li>
+            <li>Modify and delete your own comments</li>
+    
+            <a href="/user/signup" class="btn btn-lg btn-success mt-3 btn-block">Create account</a>
+        </div>
+    </div>
+
+</main>
+
+<% include ../partials/footer %>
