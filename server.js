@@ -11,7 +11,7 @@ const express = require("express"),
 
 // ===== DATABASE =============================================================
 // Connect to the database.
-mongoose.connect('mongodb://localhost/park_discovery', {
+mongoose.connect(process.env.MONGODB_URL, {
         useNewUrlParser: true
     }).then(() => {
         printLog("Connection to database has been established.");
