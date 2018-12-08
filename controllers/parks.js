@@ -36,7 +36,7 @@ const upload = multer({
 
 const cloudinary = require("cloudinary");
 cloudinary.config({ 
-  cloud_name: 'cheezztouch', 
+  cloud_name: 'parkdiscovery', 
   api_key: process.env.CLOUDINARY_API_KEY, 
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
