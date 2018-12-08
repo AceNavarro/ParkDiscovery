@@ -21,7 +21,7 @@
                         <span class="small text-muted"><%= getDisplayDate(comment.updatedAt) %></span>
                     </div>
                     <div class="pl-4">
-                        <p class="text-justify"><%= comment.text %></p>
+                        <p class="text-justify text-body"><%= comment.text %></p>
                         <% if (user && user._id.equals(comment.author.userId)) { %>
                             <div class="mt-2 mb-3">
                                 <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/comments/<%= comment._id %>/edit">

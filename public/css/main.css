@@ -64,3 +64,10 @@ font-size: 0.8rem;
 .checked {
     color: orange;
 }
+
+
+/* Text body */
+.text-body {
+    /* all whitespace preserved */
+    white-space: pre-wrap;
+}
