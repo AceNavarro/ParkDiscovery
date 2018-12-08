@@ -59,7 +59,6 @@ app.use(require("./controllers/reviews"));
 
 
 // ===== LISTEN ================================================================
-var port = 3000;
-app.listen(port, () => {
-    printLog("The Park Discovery server is listening on port " + port + ".");
+app.listen(process.env.PORT, () => {
+    printLog("The Park Discovery server is started.");
 });
