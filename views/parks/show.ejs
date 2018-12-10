@@ -11,7 +11,7 @@
     <div class="card shadow mb-4">
         <img class="card-img-top" src="<%= park.image %>" alt="Park image">
         <div class="card-body">
-            <p class="card-text lead text-justify text-body"><%= park.description %></p>
+            <p class="card-text lead text-body"><%= park.description %></p>
             <p class="card-text text-muted font-italic">Submitted by <%= park.author.username %></p>
 
             <% if (user && user._id.equals(park.author.userId)) { %>
@@ -97,7 +97,7 @@
                             <%- '<span class="fa fa-star"></span>'.repeat(5 - review.rating) %>
                         </div>
                         <div class="pl-4">
-                            <p class="text-justify text-body"><%= review.text %></p>
+                            <p class="text-body"><%= review.text %></p>
                             <% if (user && user._id.equals(review.author.userId)) { %>
                                 <div class="mt-2 mb-3">
                                     <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/reviews/<%= review._id %>/edit">
@@ -164,7 +164,7 @@
                             <span class="small text-muted"><%= getDisplayDate(comment.updatedAt) %></span>
                         </div>
                         <div class="pl-4">
-                            <p class="text-justify text-body"><%= comment.text %></p>
+                            <p class="text-body"><%= comment.text %></p>
                             <% if (user && user._id.equals(comment.author.userId)) { %>
                                 <div class="mt-2 mb-3">
                                     <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/comments/<%= comment._id %>/edit">

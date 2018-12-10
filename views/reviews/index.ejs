@@ -36,7 +36,7 @@
                         <%- '<span class="fa fa-star"></span>'.repeat(5 - review.rating) %>
                     </div>
                     <div class="pl-4">
-                        <p class="text-justify text-body"><%= review.text %></p>
+                        <p class="text-body"><%= review.text %></p>
                         <% if (user && user._id.equals(review.author.userId)) { %>
                             <div class="mt-2 mb-3">
                                 <a class="btn btn-success btn-sm" href="/parks/<%= park._id %>/reviews/<%= review._id %>/edit">
