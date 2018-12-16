@@ -31,7 +31,7 @@
                     <div class="gallery card border-success shadow">
                         <!-- <img class="card-img-top" src="<%= park.image %>" alt="Park Image">
                         Due to limation of object-fit for IE, a workaround is then used. -->
-                        <div class="card-img-top" style="background-image: url(<%= park.image %>)"></div>
+                        <a class="card-img-top" href="/parks/<%= park._id %>" style="background-image: url(<%= park.image %>)"></a>
                         <div class="card-body">
                             <h5 class="card-title mb-0"><%= park.name %></h5>
                             <div class="mt-2 mb-3">
