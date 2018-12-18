@@ -37,22 +37,17 @@ router.get("/user/signup", (req, res) => {
 });
 
 // Do signup
-router.post("/user/signup", (req, res) => {
-    User.register(new User({ username: req.body.username }), req.body.password)
-        .then(user => {
-            printLog("User " + req.body.username + " was registered.");
-            passport.authenticate('local')(req, res, () => {
-                printLog("User " + req.body.username + " was logged in.");
-                req.flash("success", "Welcome, " + req.body.username + "!")
-                res.redirect('/parks');
-            });
-        })
-        .catch(err => {
-            printLog("Failed to register user " + req.body.username);
-            printLog(err);
-            req.flash("error", err.message)
-            res.redirect("/user/signup");
+router.post("/user/signup", async (req, res) => {
+    try {
+        await User.register(new User({ username: req.body.username }), req.body.password);
+        passport.authenticate('local')(req, res, () => {
+            req.flash("success", "Welcome, " + req.body.username + "!")
+            res.redirect('/parks');
         });
+    } catch (err) {
+        req.flash("error", err.message)
+        res.redirect("/user/signup");
+    }
 });
 
 module.exports = router;

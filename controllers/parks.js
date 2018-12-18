@@ -50,45 +50,40 @@ router.get("/", (req, res) => {
 });
 
 // INDEX route
-router.get("/parks", (req, res) => {
-    if (req.query.search) {
-        // Read all parks from database based on search keyword.
-        const regex = new RegExp(escapeRegex(req.query.search), 'gi');
-        Park.find({$or: [{name: regex,},
-                        //  {location: regex}, 
-                         {"author.username":regex}
-            ]}).exec()
-            .then(parks => {
-                printLog("Retrieved filtered parks from database.");
-                if (parks.length === 0) {
-                    // If result is empty, need to redirect back to this page
-                    // to properly show the flash message.
-                    req.flash("error", "Your search did not match any park.");
-                    return res.redirect("/parks");
-                }
-                res.render("parks/index", { parks: parks });
-            }).catch(err => {
-                printLog("ERROR: Failed to read from the database.");
-                handleGenericError(err, req, res);
-            });
-    } else {
-        if (req.query.search === "") {
-            // If search is empty, need to redirect back to this route 
-            // to clear-out the queries from the path.
-            return res.redirect("/parks");
+router.get("/parks", async (req, res) => {
+    try {
+        if (req.query.search) {
+            // Read all parks from database based on search keyword.
+            const regex = new RegExp(escapeRegex(req.query.search), 'gi');   
+            const parks = await Park.find({$or: [
+                {name: regex,},
+                {location: regex}, 
+                {"author.username":regex}
+            ]});
+    
+            if (!parks || parks.length === 0) {
+                // If result is empty, need to redirect back to this page
+                // to properly show the flash message.
+                req.flash("error", "Your search did not match any park.");
+                return res.redirect("/parks");
+            }
+            res.render("parks/index", { parks: parks });
+        } else {
+            if (req.query.search === "") {
+                // If search is empty, need to redirect back to this route 
+                // to clear-out the queries from the path.
+                return res.redirect("/parks");
+            }
+    
+            // Read all parks from database.
+            const parks = await Park.find({});
+            res.render("parks/index", { parks: parks });
         }
-
-        // Read all parks from database.
-        Park.find({}).exec()
-            .then(parks => {
-                printLog("Retrieved parks from database.");
-                res.render("parks/index", { parks: parks });
-            }).catch(err => {
-                printLog("ERROR: Failed to read from the database.");
-                handleGenericError(err, req, res);
-            });
+    } catch(err) {
+        handleGenericError(err, req, res);
     }
 });
+
 
 // NEW route
 router.get("/parks/new", isUserAuthenticated, (req, res) => {
@@ -98,86 +93,75 @@ router.get("/parks/new", isUserAuthenticated, (req, res) => {
 // CREATE route
 router.post("/parks", isUserAuthenticated,
     upload.single('image'), 
-    (req, res) => {        
-        // Check location using geocoder
-        geocoder.geocode(req.body.location)
-        .then(result => {
-            printLog("Park location has been validated.");
-            req.body.park.lat = result[0].latitude;
-            req.body.park.lng = result[0].longitude;
-            req.body.park.location = result[0].formattedAddress;
-
-            // Upload image into cloudinary
-            cloudinary.v2.uploader.upload(req.file.path)
-                .then(result => {
-                    printLog("Image has been uploaded to cloudinary.");
-                        // Add cloudinary info for the image
-                        req.body.park.image = result.secure_url;
-                        req.body.park.imageId = result.public_id;
-                        // Add user information
-                        req.body.park.author = {
-                            userId: req.user._id,
-                            username: req.user.username
-                        };
-                        // Insert new park to database.
-                        Park.create(req.body.park)
-                            .then(park => {
-                                printLog("Added new park to the database.");
-                                // Redirect to the gallery page
-                                res.redirect("/parks/" + park._id);
-                            }).catch(err => {
-                                printLog("ERROR: Failed to insert an item on the database.");
-                                handleGenericError(err, req, res);
-                            });
-                }).catch(err => {
-                    printLog("ERROR: Failed to upload the park image.");
-                    printLog(err);
-                    req.flash("error", "Ooops! The seems to be a problem while uploading the image. Please try again.");
-                    res.redirect("back");
-                });
-        }).catch(err => {
-            printLog("ERROR: Park location is invalid.");
-            printLog(err);
+    async (req, res) => {    
+        try {
+            // Check location using geocoder
+            const geoResult = await geocoder.geocode(req.body.location);
+            req.body.park.lat = geoResult[0].latitude;
+            req.body.park.lng = geoResult[0].longitude;
+            req.body.park.location = geoResult[0].formattedAddress;
+        } catch(err) {
             req.flash("error", "Please enter a valid location.");
-            res.redirect("back");
-        });
+            return res.redirect("back");
+        }
+
+        try {
+            // Upload image into cloudinary
+            const uploadResult = await cloudinary.v2.uploader.upload(req.file.path);
+            req.body.park.image = uploadResult.secure_url;
+            req.body.park.imageId = uploadResult.public_id;
+        } catch (err) {
+            req.flash("error", "Ooops! The seems to be a problem while uploading the image. Please try again.");
+            return res.redirect("back");
+        }
+        
+        try {
+            // Add user information
+            req.body.park.author = {
+                userId: req.user._id,
+                username: req.user.username
+            };
+            // Insert new park to database.
+            const park = await Park.create(req.body.park);
+            // Redirect to the gallery page
+            res.redirect("/parks/" + park._id);   
+        } catch (err) {
+            return handleGenericError(err, req, res);
+        }
 });
 
+
 // SHOW route
-router.get("/parks/:id", (req, res) => {
-    Park.findById(req.params.id)
-        .populate({
-            path: "comments",
-            // show the latest first (descending)
-            options: {sort: {createdAt: -1}
-        }})
-        .populate({
-            path: "reviews",
-            // show the latest first (descending)
-            options: {sort: {createdAt: -1}
-        }}).exec()
-        .then(park => {
-            printLog("Retrieved park info from database.");
-            res.render("parks/show", { park: park, getDisplayDate: getDisplayDate });
-        }).catch(err => {
-            printLog("ERROR: Failed to read from the database.");
-            handleGenericError(err, req, res);
-        });
+router.get("/parks/:id", async (req, res) => {
+    try {
+        const park = await Park.findById(req.params.id)
+            .populate({
+                path: "comments",
+                // show the latest first (descending)
+                options: {sort: {createdAt: -1}
+            }})
+            .populate({
+                path: "reviews",
+                // show the latest first (descending)
+                options: {sort: {createdAt: -1}
+            }});
+        res.render("parks/show", { park: park, getDisplayDate: getDisplayDate });
+    } catch (err) {
+        handleGenericError(err, req, res);
+    }
 });
 
 // EDIT route
 router.get("/parks/:id/edit", 
     isUserAuthenticated, 
     checkParkPermission, 
-    (req, res) => {
-        Park.findById(req.params.id).exec()
-            .then(park => {
-                printLog("Retrieved park info from database.");
-                res.render("parks/edit", { park: park });
-            }).catch(err => {
-                printLog("ERROR: Failed to read from the database.");
-                handleGenericError(err, req, res);
-            });
+    async (req, res) => {
+        try {
+            const park = await Park.findById(req.params.id);
+            res.render("parks/edit", { park: park });
+        } catch (err) {
+            handleGenericError(err, req, res);
+        }
 });
 
 // UPDATE route
@@ -185,111 +169,72 @@ router.put("/parks/:id",
     isUserAuthenticated, 
     checkParkPermission,
     upload.single('image'), 
-    (req, res) => {
+    async (req, res) => {
         // Delete the rating property from this update because it not part of this scope.
         delete req.body.park.rating;
-
-        // Check location using geocoder
-        geocoder.geocode(req.body.location)
-        .then(result => {
-            printLog("Park location has been validated.");
-            req.body.park.lat = result[0].latitude;
-            req.body.park.lng = result[0].longitude;
-            req.body.park.location = result[0].formattedAddress;
-
-            // Update the park in database
-            Park.findOneAndUpdate({ _id: req.params.id }, req.body.park).exec()
-                .then(park => {
-                    printLog("Updated park info from database.");
-
-                    // Check if a new image file was uploaded
-                    if (req.file) {
-                        // Delete existing image
-                        cloudinary.v2.uploader.destroy(park.imageId)
-                            .then(result => {
-                                printLog("Deleted existing park image before updating.");
-    
-                                // Upload the new image
-                                cloudinary.v2.uploader.upload(req.file.path)
-                                    .then(result => {
-                                        printLog("Uploaded the modified park image.");
-                                        try {
-                                            // Update the image info on park model and saec
-                                            park.image = result.secure_url;
-                                            park.imageId = result.public_id;
-                                            park.save();
-                                            res.redirect("/parks/" + req.params.id)
-                                        } catch (err) {
-                                            printLog("ERROR: Failed to update park info on database.");
-                                            handleGenericError(err, req, res);
-                                        }
-                                    }).catch(err => {
-                                        printLog("ERROR: Failed to upload the updated park image.");
-                                        printLog(err);
-                                        req.flash("error", "Ooops! The seems to be a problem while updating the image. Please try again.");
-                                        res.redirect("back");
-                                    });
-                            }).catch(err => {
-                                printLog("ERROR: Failed to delete the existing park image before updating.");
-                                printLog(err);
-                                req.flash("error", "Ooops! The seems to be a problem while updating the image. Please try again.");
-                                res.redirect("back");
-                            });
-                    } else {
-                        res.redirect("/parks/" + req.params.id)
-                    }
-                }).catch(err => {
-                    printLog("ERROR: Failed to update park info on database.");
-                    handleGenericError(err, req, res);
-                });
-        }).catch(err => {
-            printLog("Park location is invalid.");
-            printLog(err);
+        
+        try {
+            // Check location using geocoder
+            const geoResult = await geocoder.geocode(req.body.location);
+            req.body.park.lat = geoResult[0].latitude;
+            req.body.park.lng = geoResult[0].longitude;
+            req.body.park.location = geoResult[0].formattedAddress;
+        } catch (err) {
             req.flash("error", "Please enter a valid location.");
             res.redirect("back");
-        });
+        }
+
+        try {
+            // Update park information
+            var park = await Park.findOneAndUpdate({ _id: req.params.id }, req.body.park, { new: true });
+        } catch (err) {
+            handleGenericError(err, req, res);
+        }
+
+        if (!req.file) {
+            // No uploaded new image
+            return res.redirect("/parks/" + req.params.id)
+        }
+
+        try {
+            // Delete existing image
+            await cloudinary.v2.uploader.destroy(park.imageId);
+            // Upload new image
+            var uploadResult = await cloudinary.v2.uploader.upload(req.file.path)
+            park.image = uploadResult.secure_url;
+            park.imageId = uploadResult.public_id;
+        } catch (err) {
+            req.flash("error", "Ooops! The seems to be a problem while updating the image. Please try again.");
+            res.redirect("back");
+        }
+        
+        try {
+            park.save();
+            res.redirect("/parks/" + req.params.id)
+        } catch (err) {
+            handleGenericError(err, req, res);
+        }
 });
 
 // DESTROY route
 router.delete("/parks/:id", 
     isUserAuthenticated, 
     checkParkPermission, 
-    (req, res) => {
-        Park.findOneAndDelete({ _id: req.params.id }).exec()
-            .then(park => {
-                printLog("Deleted park info from database.");
-                // Delete asociated comments
-                Comment.deleteMany({ _id: { $in: park.comments }}).exec()
-                    .then(result => {
-                        printLog("Deleted park's associated comments from database.");
-                    })
-                    .catch(err => {
-                        printLog("ERROR: Failed to delete park's associated comments on database.");
-                        handleGenericError(err, req, res);
-                    });
-                // Delete associated review
-                Review.deleteMany({ _id: { $in: park.reviews }}).exec()
-                .then(result => {
-                    printLog("Deleted park's associated reviews from database.");
-                })
-                .catch(err => {
-                    printLog("ERROR: Failed to delete park's associated reviews on database.");
-                    handleGenericError(err, req, res);
-                });
-                // Delete associated image from cloudinary
-                cloudinary.v2.uploader.destroy(park.imageId)
-                    .then(result => {
-                        printLog("Deleted park's image on cloud.");
-                    }).catch(err => {
-                        printLog("ERROR: Failed to delete image on cloud for associated deleted park.");
-                        handleGenericError(err, req, res);
-                    })
-                // Redirect back to gallery
-                res.redirect("/parks");
-            }).catch(err => {
-                printLog("ERROR: Failed to delete park info on database.");
-                handleGenericError(err, req, res);
-            });
+    async (req, res) => {
+        try {
+            // Delete park
+            const park = await Park.findOneAndDelete({ _id: req.params.id });
+            // Delete associated comments
+            await Comment.deleteMany({ _id: { $in: park.comments }});
+            // Delete associated review
+            await Review.deleteMany({ _id: { $in: park.reviews }});
+            // Delete associated image from cloudinary
+            await cloudinary.v2.uploader.destroy(park.imageId);
+            // Redirect back to gallery
+            res.redirect("/parks");
+        } catch (err) {
+            handleGenericError(err, req, res);
+        }
 });
 
 // Escapes a regex input string to make safe from external attacks.

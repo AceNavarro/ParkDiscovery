@@ -12,7 +12,9 @@ const express = require("express"),
 // ===== DATABASE =============================================================
 // Connect to the database.
 mongoose.connect(process.env.MONGODB_URL, {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: true
     }).then(() => {
         printLog("Connection to database has been established.");
     }).catch(err => {
